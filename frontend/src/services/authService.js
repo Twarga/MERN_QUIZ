@@ -2,52 +2,87 @@
 import axios from 'axios';
 
 // Define the base URL for the backend API
-// Make sure the backend server is running!
-const API_URL = 'http://localhost:5000/api/auth/'; // Adjust port if needed
+const API_URL = 'http://localhost:5000/api/auth/';
+
+// Create axios instance with defaults
+const api = axios.create({
+    baseURL: API_URL,
+    headers: {
+        'Content-Type': 'application/json'
+    }
+});
+
+// Add a request interceptor to attach token to protected requests
+api.interceptors.request.use(
+    (config) => {
+        // Only add token for getCurrentUser endpoint
+        if (config.url === 'me') {
+            const token = localStorage.getItem('userToken');
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
 
 // Register user
-const register = (username, password) => {
-    return axios.post(API_URL + 'register', {
-        username,
-        password,
-    });
+const register = async (username, password) => {
+    try {
+        const response = await api.post('register', {
+            username,
+            password
+        });
+        // Store token if successful
+        if (response.data.token) {
+            localStorage.setItem('userToken', response.data.token);
+        }
+        return response.data;
+    } catch (error) {
+        console.error("Registration error:", error.response?.data || error.message);
+        throw error;
+    }
 };
 
 // Login user
-const login = (username, password) => {
-    return axios.post(API_URL + 'login', {
+const login = async (username, password) => {
+    try {
+        const response = await api.post('login', {
             username,
-            password,
-        })
-        .then((response) => {
-            // If login is successful, store the token
-            if (response.data.token) {
-                localStorage.setItem('userToken', response.data.token); // Store token
-            }
-            return response.data; // Return the response data (including token)
+            password
         });
+        // Store token if successful
+        if (response.data.token) {
+            localStorage.setItem('userToken', response.data.token);
+        }
+        return response.data;
+    } catch (error) {
+        console.error("Login error:", error.response?.data || error.message);
+        throw error;
+    }
 };
 
 // Logout user
 const logout = () => {
-    localStorage.removeItem('userToken'); // Remove token
-    // Optionally: make an API call to invalidate the token on the server side
+    localStorage.removeItem('userToken');
 };
 
 // Get current user data (requires token)
-const getCurrentUser = (token) => {
-    return axios.get(API_URL + 'me', {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    });
+const getCurrentUser = async () => {
+    try {
+        return await api.get('me');
+    } catch (error) {
+        console.error("Get current user error:", error.response?.data || error.message);
+        throw error;
+    }
 };
 
 const authService = {
     register,
     login,
     logout,
-    getCurrentUser,
+    getCurrentUser
 };
 
 export default authService;

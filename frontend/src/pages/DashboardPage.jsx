@@ -1,19 +1,18 @@
-// src/pages/DashboardPage.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import quizService from '../services/quizService';
-import { useAuth } from '../context/AuthContext'; // To get current user for filtering 'My Quizzes'
+import { useAuth } from '../context/AuthContext';
 
 function DashboardPage() {
     const [quizzes, setQuizzes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const { currentUser } = useAuth(); // Get current user
+    const { currentUser } = useAuth();
 
     useEffect(() => {
         const fetchQuizzes = async () => {
             try {
-                const response = await quizService.getAllQuizzes(); // Fetch all quizzes
+                const response = await quizService.getAllQuizzes();
                 setQuizzes(response.data.data);
                 setError('');
             } catch (err) {
@@ -25,62 +24,145 @@ function DashboardPage() {
         };
 
         fetchQuizzes();
-    }, []); // Fetch on component mount
+    }, []);
 
     // Filter quizzes created by the current user
     const myQuizzes = quizzes.filter(quiz => quiz.createdBy?._id === currentUser?._id);
     // Filter quizzes created by others
     const otherQuizzes = quizzes.filter(quiz => quiz.createdBy?._id !== currentUser?._id);
 
+    // Function to format date
+    const formatDate = (dateString) => {
+        const options = { year: 'numeric', month: 'short', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+    };
+
+    if (loading) {
+        return <div className="spinner"></div>;
+    }
+
     return (
-        <div>
-            <h2>Dashboard</h2>
-            <p>Welcome, {currentUser?.username}!</p>
+        <div className="dashboard-container">
+            <div className="dashboard-header">
+                <h1>My Dashboard</h1>
+                <Link to="/create-quiz" className="btn">Create New Quiz</Link>
+            </div>
 
-            <Link to="/create-quiz" style={{ marginBottom: '20px', display: 'inline-block' }}>
-                Create New Quiz
-            </Link>
-
-            {loading && <p>Loading quizzes...</p>}
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-
-            {!loading && !error && (
-                <div>
-                    {/* Quizzes Created By Me */}
-                    <h3>My Quizzes</h3>
-                    {myQuizzes.length > 0 ? (
-                        <ul>
-                            {myQuizzes.map(quiz => (
-                                <li key={quiz._id}>
-                                    <strong>{quiz.title}</strong> - {quiz.description}
-                                     ({quiz.questions?.length || 0} questions)
-                                    <Link to={`/quiz/${quiz._id}/add-questions`} style={{ marginLeft: '10px' }}>Add/Edit Questions</Link>
-                                    {/* Add Take Quiz link if desired */}
-                                    <Link to={`/quiz/${quiz._id}/take`} style={{ marginLeft: '10px' }}>Take Quiz</Link>
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p>You haven't created any quizzes yet.</p>
-                    )}
-
-                     {/* Quizzes Created By Others */}
-                    <h3 style={{marginTop: '30px'}}>Other Quizzes</h3>
-                     {otherQuizzes.length > 0 ? (
-                        <ul>
-                            {otherQuizzes.map(quiz => (
-                                <li key={quiz._id}>
-                                    <strong>{quiz.title}</strong> (by {quiz.createdBy?.username || 'Unknown'}) - {quiz.description}
-                                     ({quiz.questions?.length || 0} questions)
-                                    <Link to={`/quiz/${quiz._id}/take`} style={{ marginLeft: '10px' }}>Take Quiz</Link>
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                         <p>No other quizzes available right now.</p>
-                    )}
+            {error && (
+                <div className="alert alert-error">
+                    <p>{error}</p>
                 </div>
             )}
+
+            <div className="dashboard-section">
+                <h2>My Quizzes</h2>
+                {myQuizzes.length > 0 ? (
+                    <div className="quiz-list">
+                        {myQuizzes.map(quiz => (
+                            <div key={quiz._id} className="quiz-item">
+                                <div className="quiz-item-header">
+                                    <h3>{quiz.title}</h3>
+                                </div>
+                                <div className="quiz-item-body">
+                                    <p>{quiz.description}</p>
+                                    <div className="quiz-stats">
+                                        <div className="quiz-stat-item">
+                                            <span role="img" aria-label="questions">❓</span> {quiz.questions?.length || 0} questions
+                                        </div>
+                                        <div className="quiz-stat-item">
+                                            <span role="img" aria-label="date">📅</span> {formatDate(quiz.createdAt)}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="quiz-item-footer">
+                                    <Link to={`/quiz/${quiz._id}/take`} className="btn btn-outline">Take Quiz</Link>
+                                    <Link to={`/quiz/${quiz._id}/add-questions`} className="btn">Edit Questions</Link>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="empty-state">
+                        <p>You haven't created any quizzes yet.</p>
+                        <Link to="/create-quiz" className="btn">Create Your First Quiz</Link>
+                    </div>
+                )}
+            </div>
+
+            <div className="dashboard-section">
+                <h2>Explore Quizzes</h2>
+                {otherQuizzes.length > 0 ? (
+                    <div className="quiz-list">
+                        {otherQuizzes.map(quiz => (
+                            <div key={quiz._id} className="quiz-item">
+                                <div className="quiz-item-header">
+                                    <h3>{quiz.title}</h3>
+                                </div>
+                                <div className="quiz-item-body">
+                                    <p>{quiz.description}</p>
+                                    <div className="quiz-stats">
+                                        <div className="quiz-stat-item">
+                                            <span role="img" aria-label="author">👤</span> By {quiz.createdBy?.username || 'Unknown'}
+                                        </div>
+                                        <div className="quiz-stat-item">
+                                            <span role="img" aria-label="questions">❓</span> {quiz.questions?.length || 0} questions
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="quiz-item-footer">
+                                    <Link to={`/quiz/${quiz._id}/take`} className="btn">Take Quiz</Link>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="empty-state">
+                        <p>No other quizzes available right now.</p>
+                    </div>
+                )}
+            </div>
+
+            <style jsx>{`
+                .dashboard-container {
+                    padding-bottom: 2rem;
+                }
+                
+                .dashboard-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 2rem;
+                }
+                
+                .dashboard-section {
+                    margin-bottom: 3rem;
+                }
+                
+                .empty-state {
+                    background: white;
+                    padding: 2rem;
+                    text-align: center;
+                    border-radius: var(--border-radius-md);
+                    box-shadow: var(--shadow-sm);
+                }
+                
+                .empty-state p {
+                    margin-bottom: 1rem;
+                    color: var(--dark);
+                }
+                
+                @media (max-width: 768px) {
+                    .dashboard-header {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 1rem;
+                    }
+                    
+                    .dashboard-header .btn {
+                        width: 100%;
+                    }
+                }
+            `}</style>
         </div>
     );
 }

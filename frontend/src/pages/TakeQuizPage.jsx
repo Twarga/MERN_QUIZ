@@ -1,4 +1,3 @@
-// src/pages/TakeQuizPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import quizService from '../services/quizService';
@@ -9,7 +8,7 @@ function TakeQuizPage() {
 
     const [quiz, setQuiz] = useState(null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [selectedAnswers, setSelectedAnswers] = useState({}); // Store answers as { questionIndex: selectedOption }
+    const [selectedAnswers, setSelectedAnswers] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [submitting, setSubmitting] = useState(false);
@@ -21,13 +20,13 @@ function TakeQuizPage() {
             try {
                 const response = await quizService.getQuizById(quizId);
                 if (!response.data.data || response.data.data.questions?.length === 0) {
-                     setError('Quiz not found or has no questions.');
-                     setQuiz(null);
+                    setError('Quiz not found or has no questions.');
+                    setQuiz(null);
                 } else {
                     setQuiz(response.data.data);
                 }
             } catch (err) {
-                console.error("Error fetching quiz for taking:", err);
+                console.error("Error fetching quiz:", err);
                 setError('Failed to load the quiz. Please try again.');
             } finally {
                 setLoading(false);
@@ -56,90 +55,177 @@ function TakeQuizPage() {
     };
 
     const handleSubmitQuiz = async () => {
-         // Optional: Check if all questions are answered
         if (Object.keys(selectedAnswers).length !== quiz.questions.length) {
-             if (!window.confirm('You have not answered all questions. Submit anyway?')) {
-                 return;
-             }
-         }
+            if (!window.confirm('You have not answered all questions. Submit anyway?')) {
+                return;
+            }
+        }
 
         setSubmitting(true);
         setError('');
 
-        // Format answers for the backend
         const answersToSubmit = quiz.questions.map((q, index) => ({
-            questionIndex: index, // Send index to match backend expectation
-            selectedAnswer: selectedAnswers[index] || null // Send selected answer or null if not answered
+            questionIndex: index,
+            selectedAnswer: selectedAnswers[index] || null
         }));
-
 
         try {
             const response = await quizService.submitQuiz(quizId, answersToSubmit);
-             // Redirect to results page, passing score and totalQuestions via state
-            navigate(`/quiz/${quizId}/results`, { state: { score: response.data.score, totalQuestions: response.data.totalQuestions } });
+            navigate(`/quiz/${quizId}/results`, { 
+                state: { 
+                    score: response.data.score, 
+                    totalQuestions: response.data.totalQuestions 
+                } 
+            });
         } catch (err) {
-             console.error("Error submitting quiz:", err);
-             const message = err.response?.data?.message || 'Failed to submit quiz.';
-             setError(message);
-             setSubmitting(false);
+            console.error("Error submitting quiz:", err);
+            const message = err.response?.data?.message || 'Failed to submit quiz.';
+            setError(message);
+            setSubmitting(false);
         }
     };
 
-    if (loading) return <div>Loading Quiz...</div>;
-    if (error) return <div style={{ color: 'red' }}>Error: {error}</div>;
-    if (!quiz) return <div>Quiz not found or is empty.</div>; // Should be caught by error state usually
+    if (loading) {
+        return <div className="spinner"></div>;
+    }
+
+    if (error && !quiz) {
+        return (
+            <div className="error-container">
+                <div className="alert alert-error">
+                    <h3>Error</h3>
+                    <p>{error}</p>
+                    <button className="btn" onClick={() => navigate('/dashboard')}>
+                        Back to Dashboard
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (!quiz) return null;
 
     const currentQuestion = quiz.questions[currentQuestionIndex];
+    const progress = ((currentQuestionIndex + 1) / quiz.questions.length) * 100;
 
     return (
-        <div>
-            <h2>Taking Quiz: {quiz.title}</h2>
-            <p>{quiz.description}</p>
-            <hr />
+        <div className="quiz-container">
+            <div className="quiz-header">
+                <h1>{quiz.title}</h1>
+                <p>{quiz.description}</p>
 
-            {/* Question Display */}
-            <div>
-                <h3>Question {currentQuestionIndex + 1} of {quiz.questions.length}</h3>
-                <p style={{fontWeight: 'bold'}}>{currentQuestion.questionText}</p>
+                <div className="progress-container">
+                    <div 
+                        className="progress-bar" 
+                        style={{ width: `${progress}%` }}
+                    ></div>
+                </div>
+                <div className="progress-text">
+                    Question {currentQuestionIndex + 1} of {quiz.questions.length}
+                </div>
+            </div>
 
-                {/* Options */}
-                <form>
+            {error && (
+                <div className="alert alert-error">
+                    {error}
+                </div>
+            )}
+
+            <div className="question-card">
+                <div className="question-number">Question {currentQuestionIndex + 1}</div>
+                <div className="question-text">{currentQuestion.questionText}</div>
+
+                <div className="options-container">
                     {currentQuestion.options.map((option, index) => (
-                        <div key={index} style={{ margin: '10px 0' }}>
-                            <label>
-                                <input
-                                    type="radio"
-                                    name={`question_${currentQuestionIndex}`}
-                                    value={option}
-                                    checked={selectedAnswers[currentQuestionIndex] === option}
-                                    onChange={() => handleAnswerSelect(currentQuestionIndex, option)}
-                                />
-                                {option}
-                            </label>
+                        <div 
+                            key={index}
+                            className={`option-item ${selectedAnswers[currentQuestionIndex] === option ? 'selected' : ''}`}
+                            onClick={() => handleAnswerSelect(currentQuestionIndex, option)}
+                        >
+                            <input
+                                type="radio"
+                                id={`option-${index}`}
+                                name={`question-${currentQuestionIndex}`}
+                                value={option}
+                                checked={selectedAnswers[currentQuestionIndex] === option}
+                                onChange={() => handleAnswerSelect(currentQuestionIndex, option)}
+                            />
+                            <label htmlFor={`option-${index}`}>{option}</label>
                         </div>
                     ))}
-                </form>
-                 {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
+                </div>
+
+                <div className="navigation-buttons">
+                    <button 
+                        onClick={goToPreviousQuestion} 
+                        disabled={currentQuestionIndex === 0}
+                        className="btn btn-outline"
+                    >
+                        Previous
+                    </button>
+
+                    {currentQuestionIndex === quiz.questions.length - 1 ? (
+                        <button 
+                            onClick={handleSubmitQuiz} 
+                            disabled={submitting}
+                            className="btn"
+                        >
+                            {submitting ? 'Submitting...' : 'Submit Quiz'}
+                        </button>
+                    ) : (
+                        <button 
+                            onClick={goToNextQuestion} 
+                            className="btn"
+                        >
+                            Next
+                        </button>
+                    )}
+                </div>
             </div>
 
-            {/* Navigation and Submission Buttons */}
-            <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between' }}>
-                <button onClick={goToPreviousQuestion} disabled={currentQuestionIndex === 0}>
-                    Previous
-                </button>
-
-                {currentQuestionIndex === quiz.questions.length - 1 ? (
-                    // Show Submit button on the last question
-                    <button onClick={handleSubmitQuiz} disabled={submitting}>
-                        {submitting ? 'Submitting...' : 'Submit Quiz'}
-                    </button>
-                ) : (
-                    // Show Next button otherwise
-                    <button onClick={goToNextQuestion} disabled={!selectedAnswers[currentQuestionIndex]}> {/* Optionally disable Next until an answer is selected */}
-                        Next
-                    </button>
-                )}
-            </div>
+            <style jsx>{`
+                .quiz-container {
+                    max-width: 800px;
+                    margin: 0 auto;
+                    padding: 2rem 1rem;
+                }
+                
+                .quiz-header {
+                    text-align: center;
+                    margin-bottom: 2rem;
+                }
+                
+                .quiz-header p {
+                    margin-bottom: 2rem;
+                    color: var(--dark);
+                    max-width: 600px;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+                
+                .progress-text {
+                    margin-top: 0.5rem;
+                    font-weight: 500;
+                    color: var(--primary);
+                }
+                
+                .error-container {
+                    max-width: 600px;
+                    margin: 3rem auto;
+                }
+                
+                .option-item {
+                    cursor: pointer;
+                }
+                
+                .option-item label {
+                    cursor: pointer;
+                    display: block;
+                    width: 100%;
+                    margin-bottom: 0;
+                    font-weight: normal;
+                }
+            `}</style>
         </div>
     );
 }

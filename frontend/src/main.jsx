@@ -1,9 +1,9 @@
-// src/main.jsx (or App.jsx if preferred)
+// src/main.jsx
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext.js'; // Import AuthProvider
+import { AuthProvider } from './context/AuthContext.jsx'; // Updated extension to .jsx
 import './index.css'; // Import the CSS file
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

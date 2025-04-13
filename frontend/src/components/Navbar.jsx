@@ -1,56 +1,84 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 function Navbar() {
     const { currentUser, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleLogout = () => {
         logout();
-        navigate('/login'); // Redirect to login after logout
+        navigate('/login');
     };
 
-    // Basic inline styles for the navbar
-    const navStyle = {
-        backgroundColor: '#f0f0f0',
-        padding: '10px 20px',
-        marginBottom: '20px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderBottom: '1px solid #ccc'
+    // Check if the link is active
+    const isActive = (path) => {
+        return location.pathname === path;
     };
 
-    const linkStyle = {
-        margin: '0 10px',
-        textDecoration: 'none',
-        color: '#333'
-    };
-
-     const buttonStyle = {
-        padding: '5px 10px',
-        cursor: 'pointer'
+    // Get user's initials for the avatar
+    const getUserInitials = () => {
+        if (currentUser && currentUser.username) {
+            return currentUser.username.charAt(0).toUpperCase();
+        }
+        return "U";
     };
 
     return (
-        <nav style={navStyle}>
-            <div>
-                <Link to={currentUser ? "/dashboard" : "/"} style={{...linkStyle, fontWeight: 'bold'}}>Quiz App</Link>
-            </div>
-            <div>
-                {currentUser ? (
-                    <>
-                        <span style={{ marginRight: '15px' }}>Welcome, {currentUser.username}!</span>
-                         <Link to="/dashboard" style={linkStyle}>Dashboard</Link>
-                        <button onClick={handleLogout} style={buttonStyle}>Logout</button>
-                    </>
-                ) : (
-                    <>
-                        <Link to="/login" style={linkStyle}>Login</Link>
-                        <Link to="/register" style={linkStyle}>Register</Link>
-                    </>
-                )}
+        <nav className="navbar">
+            <div className="navbar-container">
+                <Link to={currentUser ? "/dashboard" : "/"} className="navbar-brand">
+                    Quiz Master
+                </Link>
+                
+                <div className="navbar-nav">
+                    {currentUser ? (
+                        <>
+                            <Link 
+                                to="/dashboard" 
+                                className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}
+                            >
+                                Dashboard
+                            </Link>
+                            <Link 
+                                to="/create-quiz" 
+                                className={`nav-link ${isActive('/create-quiz') ? 'active' : ''}`}
+                            >
+                                Create Quiz
+                            </Link>
+                            
+                            <div className="user-menu">
+                                <div className="avatar">
+                                    {getUserInitials()}
+                                </div>
+                                <span className="username">{currentUser.username}</span>
+                                <button 
+                                    onClick={handleLogout} 
+                                    className="btn btn-outline"
+                                    style={{ padding: '0.5rem 1rem' }}
+                                >
+                                    Logout
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <Link 
+                                to="/login" 
+                                className={`nav-link ${isActive('/login') ? 'active' : ''}`}
+                            >
+                                Login
+                            </Link>
+                            <Link 
+                                to="/register" 
+                                className={`nav-link ${isActive('/register') ? 'active' : ''}`}
+                            >
+                                Register
+                            </Link>
+                        </>
+                    )}
+                </div>
             </div>
         </nav>
     );
