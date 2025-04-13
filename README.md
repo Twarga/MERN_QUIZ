@@ -2,7 +2,7 @@
 
 <div align="center">
   
-![Quiz Master Logo](https://via.placeholder.com/150x150/4361ee/ffffff?text=QM)
+![Quiz Master Logo](images/logo.png)
 
 ### Modern, responsive quiz application built with the MERN stack
 
