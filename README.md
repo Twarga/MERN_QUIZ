@@ -1,15 +1,16 @@
+
 # Quiz Master - Interactive Quiz Application
 
 <div align="center">
-  
-![Quiz Master Logo](images/logo.png)
 
-### Modern, responsive quiz application built with the MERN stack
+  <img src="images/logo.png" alt="Quiz Master Logo" width="150" style="border-radius: 12px; box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);"/>
 
-[![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![Express.js](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
-[![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+  ### Modern, responsive quiz application built with the MERN stack
+
+  [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+  [![Express.js](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+  [![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
+  [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 
 </div>
 
@@ -33,10 +34,12 @@ Quiz Master is a full-stack web application that allows users to create, share, 
   
   <img src="images/quiz.png" width="80%">
   <p><em>Engaging quiz interface with progress tracking and visual feedback</em></p>
-   <img src="images/login.png" width="80%">
-   <img src="images/create.png" width="80%">
 
+  <img src="images/login.png" width="80%">
+  <p><em>Login screen with secure access</em></p>
 
+  <img src="images/create.png" width="80%">
+  <p><em>Quiz creation interface</em></p>
 </div>
 
 ## 🚀 Getting Started
@@ -57,7 +60,7 @@ Quiz Master is a full-stack web application that allows users to create, share, 
 
 2. **Set up environment variables**
    
-   Create a `.env` file in the backend directory:
+   Create a `.env` file in the `backend` directory:
    ```
    PORT=5000
    MONGO_URI=your_mongodb_connection_string
@@ -69,11 +72,11 @@ Quiz Master is a full-stack web application that allows users to create, share, 
    ```bash
    # Install root dependencies
    npm install
-   
+
    # Install backend dependencies
    cd backend
    npm install
-   
+
    # Install frontend dependencies
    cd ../frontend
    npm install
@@ -123,7 +126,7 @@ quiz-master/
 │       ├── App.jsx         # Main app component
 │       └── index.css       # Global styles
 │
-└── package.json           # Root package.json for scripts
+└── package.json            # Root package.json for scripts
 ```
 
 ## 📝 Features in Detail
@@ -179,7 +182,7 @@ Project Link: [https://github.com/twarga/quiz-master](https://github.com/twarga/
 ---
 
 <div align="center">
-  
-Made with ❤️ by Youness Touzani (twarga)
-
+  Made with ❤️ by Youness Touzani (twarga)
 </div>
+```
+
