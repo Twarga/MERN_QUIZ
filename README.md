@@ -28,11 +28,15 @@ Quiz Master is a full-stack web application that allows users to create, share, 
 ## 🖼️ Screenshots
 
 <div align="center">
-  <img src="https://via.placeholder.com/800x400/f8f9fa/4361ee?text=Dashboard+View" alt="Dashboard Screenshot" width="80%">
+  <img src="images/main.png" alt="Dashboard Screenshot" width="80%">
   <p><em>User dashboard with quiz management</em></p>
   
-  <img src="https://via.placeholder.com/800x400/f8f9fa/4361ee?text=Interactive+Quiz+Experience" alt="Quiz Experience Screenshot" width="80%">
+  <img src="images/quiz.png" width="80%">
   <p><em>Engaging quiz interface with progress tracking and visual feedback</em></p>
+   <img src="images/login.png" width="80%">
+   <img src="images/create.png" width="80%">
+
+
 </div>
 
 ## 🚀 Getting Started
